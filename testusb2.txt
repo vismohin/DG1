@@ -9,3 +9,8 @@ IP ADDRESS
 10.10.10.8
 10.10.17.135
 101.1.19.2
+
+https://github.com/vismohin/DG1
+https://github.com/vismohin/jeff1
+
+new rule- Allow rule on the above rule of upload restrict
