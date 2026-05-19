@@ -1,0 +1,259 @@
+def check_environment():
+    message = "Python environment is active!"
+    test_math = 2 ** 3
+    print(f"✅ {message}")
+    print(f"🔢 Math Test (2^3): {test_math}")
+
+if __name__ == "__main__":
+    check_environment()
+
+from unittest.mock import MagicMock
+
+# Create a dummy object that can mimic any behavior
+dummy_api = MagicMock()
+dummy_api.get_status.return_value = "Connected"
+
+print(dummy_api.get_status()) # Returns 'Connected'
+
+class DummyUser:
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+
+# Create test data
+users = [DummyUser(i, f"User_{i}") for i in range(3)]
+for user in users:
+    print(f"Created: {user.name} (ID: {user.id})")
+
+
+import json
+import os
+import pandas as pd
+import py7zr
+
+
+def json_to_excel_and_7z(json_file_path, excel_file_path, archive_file_path):
+    """Converts a JSON file to Excel and compresses it into a 7z archive."""
+    try:
+        # Step 1: Load JSON data
+        print(f"Reading {json_file_path}...")
+        with open(json_file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        # Step 2: Convert to DataFrame and save to Excel
+        print(f"Converting to Excel and saving as {excel_file_path}...")
+        df = pd.DataFrame(data)
+        df.to_excel(excel_file_path, index=False, engine="openpyxl")
+
+        # Step 3: Compress Excel file to 7z
+        print(f"Compressing into {archive_file_path}...")
+        with py7zr.SevenZipFile(archive_file_path, "w") as archive:
+            archive.write(excel_file_path, arcname=os.path.basename(excel_file_path))
+
+        # Optional: Clean up the uncompressed Excel file
+        if os.path.exists(archive_file_path):
+            os.remove(excel_file_path)
+            print("Cleanup complete. Temporary Excel file removed.")
+
+        print("Process completed successfully!")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+# --- Configuration ---
+# Replace these filenames with your actual paths
+input_json = "data.json"
+temp_excel = "output.xlsx"
+final_7z = "output_archive.7z"
+
+# Run the function
+
+json_to_excel_and_7z(input_json, temp_excel, final_7z)
+
+
+
+
+import os
+import shutil
+
+
+def move_files(source_folder, destination_folder):
+    """Moves all files from the source folder to the destination folder."""
+    # Create destination folder if it doesn't exist
+    if not os.path.exists(destination_folder):
+        os.makedirs(destination_folder)
+        print(f"Created destination directory: {destination_folder}")
+
+    # Check if source directory exists
+    if not os.path.exists(source_folder):
+        print(f"Error: Source directory '{source_folder}' does not exist.")
+        return
+
+    # List all items in the source directory
+    files = os.listdir(source_folder)
+
+    if not files:
+        print("No files found in the source folder.")
+        return
+
+    # Loop through and move items
+    for file_name in files:
+        source_path = os.path.join(source_folder, file_name)
+        destination_path = os.path.join(destination_folder, file_name)
+
+        # Ensure we are only moving files, not sub-folders
+        if os.path.isfile(source_path):
+            try:
+                shutil.move(source_path, destination_path)
+                print(f"Moved: {file_name}")
+            except Exception as e:
+                print(f"Failed to move {file_name}: {e}")
+
+
+# --- Configuration ---
+# Replace these with your actual folder paths
+SOURCE = "./source_directory"
+DESTINATION = "./destination_directory"
+
+# Run the function
+move_files(SOURCE, DESTINATION)
+
+
+import email
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import json
+import os
+import smtplib
+import pandas as pd
+
+
+def json_to_excel_and_email(json_file_path, excel_file_path, recipient_email):
+    """Converts JSON to Excel and emails the file as an attachment."""
+    try:
+        # Step 1: Convert JSON to Excel
+        print("Converting JSON to Excel...")
+        with open(json_file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        df = pd.DataFrame(data)
+        df.to_excel(excel_file_path, index=False, engine="openpyxl")
+        print(f"Saved Excel file to {excel_file_path}")
+
+        # Step 2: Configure Email Settings
+        # For Gmail, use an "App Password", not your normal login password.
+        sender_email = "your_email@gmail.com"
+        sender_password = "your_app_password"
+
+        # Create the email message
+        msg = MIMEMultipart()
+        msg["From"] = sender_email
+        msg["To"] = recipient_email
+        msg["Subject"] = "Automated JSON to Excel Report"
+
+        # Email body
+        body = "Hello,\n\nPlease find the converted Excel report attached to this email."
+        msg.attach(MIMEText(body, "plain"))
+
+        # Attach the Excel file
+        print("Attaching Excel file...")
+        with open(excel_file_path, "rb") as f:
+            attachment = MIMEApplication(f.read(), _subtype="xlsx")
+            attachment.add_header(
+                "Content-Disposition",
+                "attachment",
+                filename=os.path.basename(excel_file_path),
+            )
+            msg.attach(attachment)
+
+        # Step 3: Send Email via Gmail SMTP Server
+        print("Connecting to SMTP server and sending email...")
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()  # Secure the connection
+            server.login(sender_email, sender_password)
+            server.send_message(msg)
+
+        print(f"Email successfully sent to {recipient_email}!")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+# --- Configuration ---
+INPUT_JSON = "data.json"
+OUTPUT_EXCEL = "report.xlsx"
+RECIPIENT = "abc@gmail.com"
+
+# Run the function
+json_to_excel_and_email(INPUT_JSON, OUTPUT_EXCEL, RECIPIENT)
+
+import email
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import json
+import os
+import smtplib
+import pandas as pd
+
+
+def json_to_excel_and_email(json_file_path, excel_file_path, recipient_email):
+    """Converts JSON to Excel and emails the file as an attachment."""
+    try:
+        # Step 1: Convert JSON to Excel
+        print("Converting JSON to Excel...")
+        with open(json_file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        df = pd.DataFrame(data)
+        df.to_excel(excel_file_path, index=False, engine="openpyxl")
+        print(f"Saved Excel file to {excel_file_path}")
+
+        # Step 2: Configure Email Settings
+        # For Gmail, use an "App Password", not your normal login password.
+        sender_email = "your_email@gmail.com"
+        sender_password = "your_app_password"
+
+        # Create the email message
+        msg = MIMEMultipart()
+        msg["From"] = sender_email
+        msg["To"] = recipient_email
+        msg["Subject"] = "Automated JSON to Excel Report"
+
+        # Email body
+        body = "Hello,\n\nPlease find the converted Excel report attached to this email."
+        msg.attach(MIMEText(body, "plain"))
+
+        # Attach the Excel file
+        print("Attaching Excel file...")
+        with open(excel_file_path, "rb") as f:
+            attachment = MIMEApplication(f.read(), _subtype="xlsx")
+            attachment.add_header(
+                "Content-Disposition",
+                "attachment",
+                filename=os.path.basename(excel_file_path),
+            )
+            msg.attach(attachment)
+
+        # Step 3: Send Email via Gmail SMTP Server
+        print("Connecting to SMTP server and sending email...")
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()  # Secure the connection
+            server.login(sender_email, sender_password)
+            server.send_message(msg)
+
+        print(f"Email successfully sent to {recipient_email}!")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+# --- Configuration ---
+INPUT_JSON = "data.json"
+OUTPUT_EXCEL = "report.xlsx"
+RECIPIENT = "abc@gmail.com"
+
+# Run the function
+json_to_excel_and_email(INPUT_JSON, OUTPUT_EXCEL, RECIPIENT)
